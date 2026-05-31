@@ -1,0 +1,32 @@
+name: Daily Checkin
+
+on:
+  schedule:
+    # 每天北京时间 08:00 (UTC 00:00)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install dailycheckin
+
+      - name: Prepare config
+        env:
+          CONFIG_JSON: ${{ secrets.CONFIG_JSON }}
+        run: |
+          mkdir -p config
+          echo "$CONFIG_JSON" > config/config.json
+
+      - name: Run daily checkin
+        run: python -c "from dailycheckin.main import checkin; checkin()"
